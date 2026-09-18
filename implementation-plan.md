@@ -31,17 +31,18 @@ Reference: `project-scope.md` (requirements/decisions), `tech-stack.md` (archite
 
 ## Phase 3 — Backend: wire processing into the API
 
-- [ ] `POST /api/images/{id}/process` — loads original, calls `BackgroundRemovalService`, stores/overwrites `processedBytes`, returns `{processedUrl}`
-- [ ] `GET /api/images/{id}/processed` — stream processed bytes (404 if not yet processed)
-- [ ] Confirm re-running `process` on the same id overwrites the previous result (supports "run again")
-- [ ] CORS config via `ALLOWED_ORIGIN` env var
-- [ ] Basic error handling: invalid file type/size → 4xx with message; missing id → 404
+- [x] `POST /api/images/{id}/process` — loads original, calls `BackgroundRemovalService`, stores/overwrites `processedBytes`, returns `{processedUrl}`
+- [x] `GET /api/images/{id}/processed` — stream processed bytes (404 if not yet processed)
+- [x] Confirm re-running `process` on the same id overwrites the previous result (supports "run again") — verified byte-identical re-run output
+- [x] CORS config via `ALLOWED_ORIGIN` env var (`CorsConfig`, default `http://localhost:5173`) — verified via preflight request
+- [x] Basic error handling: invalid file type/size → 4xx with message; missing id → 404 (process on missing id, get processed before processing)
 
 ## Phase 4 — Frontend: scaffolding & API client
 
-- [ ] `api.ts` — fetch wrappers: `uploadImage`, `processImage`, `deleteImage`, URL helpers for original/processed
-- [ ] `.env` with `VITE_API_BASE_URL`
-- [ ] Basic app shell/layout, no styling yet
+- [x] `api.ts` — fetch wrappers: `uploadImage`, `processImage`, `deleteImage`, URL helpers for original/processed
+- [x] `.env` (+ committed `.env.example`) with `VITE_API_BASE_URL=http://localhost:8080`
+- [x] Basic app shell/layout, no styling yet — stripped Vite/React demo boilerplate, removed unused demo assets, minimal `index.css`/`App.css` reset
+- [x] Verified: `tsc -b` + `npm run build` succeed, dev server serves the shell at `http://localhost:5173` (HTTP 200)
 
 ## Phase 5 — Frontend: core UI
 

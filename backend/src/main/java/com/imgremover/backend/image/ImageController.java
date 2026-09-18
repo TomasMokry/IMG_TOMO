@@ -1,5 +1,6 @@
 package com.imgremover.backend.image;
 
+import com.imgremover.backend.bgremoval.BackgroundRemovalService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +27,11 @@ public class ImageController {
     private static final long MAX_FILE_SIZE_BYTES = 10L * 1024 * 1024;
 
     private final ImageRepository imageRepository;
+    private final BackgroundRemovalService backgroundRemovalService;
 
-    public ImageController(ImageRepository imageRepository) {
+    public ImageController(ImageRepository imageRepository, BackgroundRemovalService backgroundRemovalService) {
         this.imageRepository = imageRepository;
+        this.backgroundRemovalService = backgroundRemovalService;
     }
 
     @PostMapping
@@ -63,6 +66,26 @@ public class ImageController {
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(entity.getContentType()))
                 .body(entity.getOriginalBytes());
+    }
+
+    @PostMapping("/{id}/process")
+    public ProcessResponse process(@PathVariable Long id) {
+        ImageEntity entity = findOrNotFound(id);
+        byte[] processed = backgroundRemovalService.removeBackground(entity.getOriginalBytes());
+        entity.setProcessedBytes(processed);
+        imageRepository.save(entity);
+        return new ProcessResponse(id, "/api/images/" + id + "/processed");
+    }
+
+    @GetMapping("/{id}/processed")
+    public ResponseEntity<byte[]> getProcessed(@PathVariable Long id) {
+        ImageEntity entity = findOrNotFound(id);
+        if (entity.getProcessedBytes() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image has not been processed yet: " + id);
+        }
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .body(entity.getProcessedBytes());
     }
 
     @DeleteMapping("/{id}")
