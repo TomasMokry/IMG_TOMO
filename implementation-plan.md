@@ -65,10 +65,20 @@ Reference: `project-scope.md` (requirements/decisions), `tech-stack.md` (archite
 
 ## Phase 8 — Deployment
 
-- [ ] `backend/Dockerfile` (multi-stage Maven build; download the ONNX model during build)
-- [ ] Railway: create backend service from Dockerfile, add MySQL plugin, set datasource env vars + `ALLOWED_ORIGIN`
-- [ ] Vercel: import `frontend/`, set `VITE_API_BASE_URL` to the Railway backend's public URL
+- [x] `backend/Dockerfile` (multi-stage Maven build; downloads the ONNX model during build) + `.dockerignore`
+- [x] `server.port=${PORT:8080}` / `server.address=0.0.0.0` added — Railway assigns `PORT` dynamically, app was hardcoded to 8080 before
+- [x] Verified locally: `mvnw package` produces the exact jar the Dockerfile expects (`backend-0.0.1-SNAPSHOT.jar`), and running it standalone with `PORT=9090` set correctly bound Tomcat to 9090 (not 8080) — Docker itself isn't installed on this machine so the image build couldn't be tested end-to-end, but the two riskiest steps (packaging, port binding) are confirmed
+- [ ] Railway: set the backend service's **Root Directory to `backend`** (required — repo is a monorepo, Railway only auto-detects `Dockerfile` at the root of the *service's* source directory), add MySQL plugin, set env vars (see below)
+- [ ] Vercel: import `frontend/`, set **Root Directory to `frontend`**, set `VITE_API_BASE_URL` to the Railway backend's public URL
 - [ ] Deployed smoke test: repeat the Phase 7 manual pass against the live URLs
+
+Railway backend env vars to set (Variables tab, after adding the MySQL plugin to the same project):
+```
+DB_URL=jdbc:mysql://${{MySQL.MYSQLHOST}}:${{MySQL.MYSQLPORT}}/${{MySQL.MYSQLDATABASE}}
+DB_USERNAME=${{MySQL.MYSQLUSER}}
+DB_PASSWORD=${{MySQL.MYSQLPASSWORD}}
+ALLOWED_ORIGIN=<your Vercel frontend URL, once known>
+```
 
 ## Phase 9 — Documentation
 

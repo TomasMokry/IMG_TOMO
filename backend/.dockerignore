@@ -1,0 +1,6 @@
+target/
+*.class
+.idea/
+*.iml
+src/main/resources/application-local.properties
+src/main/resources/model/*.onnx
