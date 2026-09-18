@@ -20,14 +20,14 @@ Reference: `project-scope.md` (requirements/decisions), `tech-stack.md` (archite
 
 ## Phase 2 — Backend: background removal model
 
-- [ ] Add ONNX Runtime dependency (`com.microsoft.onnxruntime:onnxruntime`)
-- [ ] Download `model_quantized.onnx` (BRIA RMBG-1.4) and confirm it loads via a small standalone test/main method
-- [ ] `OnnxModelConfig` — load `OrtSession` once at startup as a singleton bean
-- [ ] `BackgroundRemovalService`:
-  - [ ] Preprocess: decode image, resize to 1024x1024 bilinear, normalize, build input tensor
-  - [ ] Run inference
-  - [ ] Postprocess: resize mask back to original dimensions, build ARGB image with alpha channel, encode PNG
-- [ ] Unit/manual test: run the service against a sample product photo saved to disk, visually confirm transparent background
+- [x] Add ONNX Runtime dependency (`com.microsoft.onnxruntime:onnxruntime` 1.30.0)
+- [x] Download `model_quantized.onnx` (BRIA RMBG-1.4, 44.4MB) to `backend/src/main/resources/model/` and confirm it loads
+- [x] `OnnxModelConfig` — load `OrtSession` once at startup as a singleton bean (from classpath bytes, no temp file)
+- [x] `BackgroundRemovalService`:
+  - [x] Preprocess: decode image, resize to 1024x1024 bilinear, normalize `(pixel/255 - 0.5)/1.0`, build NCHW input tensor
+  - [x] Run inference
+  - [x] Postprocess: min-max normalize mask, resize back to original dimensions, build ARGB image with alpha channel, encode PNG
+- [x] Manual test (`BackgroundRemovalServiceManualTest`, env-var gated): ran against a sample product photo, verified via pixel inspection — background alpha=0, product pixel alpha=255 with original color preserved
 
 ## Phase 3 — Backend: wire processing into the API
 
