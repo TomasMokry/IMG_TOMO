@@ -25,11 +25,11 @@ public class ImageEntity {
     private String contentType;
 
     @Lob
-    @Column(name = "original_bytes", columnDefinition = "LONGBLOB", nullable = false)
+    @Column(name = "original_bytes", nullable = false)
     private byte[] originalBytes;
 
     @Lob
-    @Column(name = "processed_bytes", columnDefinition = "LONGBLOB")
+    @Column(name = "processed_bytes")
     private byte[] processedBytes;
 
     private Instant createdAt;
@@ -50,6 +50,10 @@ public class ImageEntity {
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getOriginalFilename() {

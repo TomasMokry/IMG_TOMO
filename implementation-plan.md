@@ -80,6 +80,17 @@ DB_PASSWORD=${{MySQL.MYSQLPASSWORD}}
 ALLOWED_ORIGIN=<your Vercel frontend URL, once known>
 ```
 
+## Backend test suite
+
+Added after deployment, covering the backend with 23 passing tests (`mvnw test`), using H2 (MySQL-compatible mode) so no real MySQL/Docker is needed to run them:
+
+- `ImageControllerTest` (`@WebMvcTest`, mocked repository/service) — upload validation (empty, wrong type, >10MB), 404s for missing/unprocessed images, process/delete happy paths
+- `ImageRepositoryTest` (`@DataJpaTest`, embedded H2) — persistence, timestamp population, updates, deletion
+- `BackgroundRemovalServiceTest` — runs the **real** ONNX model against a generated test image, verifies background alpha≈0 and foreground alpha≈255 with color preserved (skips gracefully if the model file isn't present locally)
+- `ImageApiEndToEndTest` (`@SpringBootTest RANDOM_PORT` + `RestTestClient`, real model + H2) — full HTTP lifecycle: upload → fetch original → process → verify transparency → re-run → confirm identical output → delete → confirm 404s; plus 400/404 edge cases
+
+Note: `ImageEntity`'s `@Column(columnDefinition = "LONGBLOB")` was removed in favor of Hibernate's dialect default (already `longblob` for MySQL) so the same entity works against H2 in tests without dialect-specific DDL.
+
 ## Phase 9 — Documentation
 
-- [ ] `README.md`: local dev setup, env vars, deploy steps for both services
+- [x] `README.md`: local dev setup, env vars, API reference, deploy steps for both services, and the deployment gotchas hit along the way
